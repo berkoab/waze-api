@@ -7,6 +7,8 @@ import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.PublishRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.waze.domain.WazeRouteDirection;
@@ -17,6 +19,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.pinpoint.PinpointClient;
 import software.amazon.awssdk.services.pinpoint.model.*;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -62,21 +65,26 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
         context.getLogger().log("Invocation started: " + timeStamp);
 
         SNSEvent.SNS sns = request.getRecords().get(0).getSNS();
-        String message = sns.getMessage();
-        String phoneNumber = sns.getMessageAttributes().get("originationNumber").getValue();
-        NumberValidateResponse numberValidateResponse = validatePhoneNumber(phoneNumber);
+        String messageBodyJson = sns.getMessage();
+
+        MessageModel messageModel = new Gson().fromJson(messageBodyJson, MessageModel.class);
+        // Parse the city and phone number
+        String originationNumber = messageModel.getOriginationNumber();
+        String message = messageModel.getMessageBody();
+
+        NumberValidateResponse numberValidateResponse = validatePhoneNumber(originationNumber);
         if(numberValidateResponse.phoneTypeCode() != 0) {
-            context.getLogger().log("Couldn't validate phone number: " + phoneNumber);
+            context.getLogger().log("Couldn't validate phone number: " + originationNumber);
             return null;
         } else {
-            phoneNumber = numberValidateResponse.cleansedPhoneNumberE164();
+            originationNumber = numberValidateResponse.cleansedPhoneNumberE164();
         }
 //        context.getLogger().log("Phone Number: " + phoneNumber);
 //        context.getLogger().log("Message: " + message);
         String[] parts = message.split(" to ");
         if(parts.length < 2) {
             String newMessage = "You must include an origination address, the word \" to \" and the destination address";
-            sendSMSMessage(newMessage, phoneNumber);
+            sendSMSMessage(newMessage, originationNumber);
             return null;
         }
         String start = parts[0];
@@ -137,7 +145,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
 
 //        System.out.println(responseBuffer.toString());
 
-        sendSMSMessage(responseBuffer.toString(), phoneNumber);
+        sendSMSMessage(responseBuffer.toString(), originationNumber);
 
         context.getLogger().log("Invocation completed: " + timeStamp);
         return null;
