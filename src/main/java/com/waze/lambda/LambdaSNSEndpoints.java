@@ -41,7 +41,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
         INSTRUCTIONS.put("TURN_LEFT", "Turn Left on ");
         INSTRUCTIONS.put("ROUNDABOUT_ENTER", "Enter Roundabout into ");
         INSTRUCTIONS.put("ROUNDABOUT_EXIT", "Exit Roundabout onto ");
-        INSTRUCTIONS.put("APPROACHING_DESTINATION", "Arriving at destination");
+        INSTRUCTIONS.put("APPROACHING_DESTINATION", "Arrive at destination");
         INSTRUCTIONS.put("CONTINUE", "Continue on ");
         INSTRUCTIONS.put("UTURN", "Make a UTurn on ");
     }
@@ -106,6 +106,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
         boolean getNextStreet = false;
         boolean writeMiles = false;
         int partsLength = 0;
+        String previousStreet = null;
 //        System.out.println(new Gson().toJson(fastestRoute));
         for(WazeRoutePart part:fastestRoute.getRouteParts()) {
             if(getNextStreet) {
@@ -113,7 +114,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
                 if(!part.getStreetName().equals("null")) {
                     responseBuffer.append(part.getStreetName());
                 } else {
-                    responseBuffer.delete(responseBuffer.length()-4, responseBuffer.length());
+                    responseBuffer.append(previousStreet);
                 }
                 writeMiles = true;
                 getNextStreet = false;
@@ -127,6 +128,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
 
                 instruction = part.getInstruction();
                 getNextStreet = true;
+                previousStreet = part.getStreetName();
             }
             if(part.getInstruction() != null && part.getInstruction().equals("APPROACHING_DESTINATION")) {
                 responseBuffer.append(INSTRUCTIONS.get(instruction));

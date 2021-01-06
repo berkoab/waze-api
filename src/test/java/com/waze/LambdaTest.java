@@ -16,9 +16,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class LambdaTest {
-//    @ClassRule
-//    public static final DropwizardAppRule<WazeConfig> RULE =
-//            new DropwizardAppRule<>(WazeApp.class, ResourceHelpers.resourceFilePath("conf.yml"));
 
     @Test
     public void LambdaTest() {
