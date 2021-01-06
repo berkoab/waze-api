@@ -46,7 +46,7 @@ public class ServerTest {
         assert (wazeRouteWithDirectionsResponse != null);
     }
 
-    @Test
+//    @Test
     public void testNotifications(){
         String latBottom = "40.72892879374242";
         String latTop = "40.733897887617324";
