@@ -102,6 +102,12 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
                 fastestRoute = direction;
             }
         }
+
+        responseBuffer.append(directions.getStartPoint());
+        responseBuffer.append(" to ");
+        responseBuffer.append(directions.getEndPoint());
+        responseBuffer.append("\n");
+
         String instruction = null;
         boolean getNextStreet = false;
         boolean writeMiles = false;
