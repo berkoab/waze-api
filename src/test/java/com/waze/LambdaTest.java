@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 public class LambdaTest {
 
-    @Test
+//    @Test
     public void LambdaTest() {
         SNSEvent snsEvent = new SNSEvent();
         SNSEvent.SNSRecord snsRecord = new SNSEvent.SNSRecord();

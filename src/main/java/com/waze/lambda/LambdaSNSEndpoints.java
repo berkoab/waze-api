@@ -116,6 +116,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
 //        System.out.println(new Gson().toJson(fastestRoute));
         for(WazeRoutePart part:fastestRoute.getRouteParts()) {
             if(getNextStreet) {
+                responseBuffer.append("\u2022");
                 responseBuffer.append(INSTRUCTIONS.get(instruction));
                 if(!part.getStreetName().equals("null")) {
                     responseBuffer.append(part.getStreetName());
@@ -137,12 +138,13 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
                 previousStreet = part.getStreetName();
             }
             if(part.getInstruction() != null && part.getInstruction().equals("APPROACHING_DESTINATION")) {
+                responseBuffer.append("\u2022");
                 responseBuffer.append(INSTRUCTIONS.get(instruction));
                 writeMiles(responseBuffer, part.getLengthOfPartInMeters());
             }
             partsLength += part.getLengthOfPartInMeters();
         }
-        responseBuffer.append("\n");
+        responseBuffer.append("\n\n");
         responseBuffer.append("Total time: ");
         responseBuffer.append(fastestRoute.getRouteDurationInMinutes());
         responseBuffer.append(" minutes.");
@@ -151,7 +153,7 @@ public class LambdaSNSEndpoints implements RequestHandler<SNSEvent, Object> {
         responseBuffer.append(kmToMiles(fastestRoute.getRouteLengthKM()));
         responseBuffer.append(" miles.");
 
-//        System.out.println(responseBuffer.toString());
+        System.out.println(responseBuffer.toString());
 
         sendSMSMessage(responseBuffer.toString(), originationNumber);
 
